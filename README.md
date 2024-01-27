@@ -1,5 +1,7 @@
 # GitHub Repository Initialization Script
 
+https://github.com/cosmicwanderer7/github-script/assets/65147258/b2f25967-cf33-4d5a-ab1e-5a885a40004a
+
 This Bash script automates the process of creating a new GitHub repository, initializing it with a README file, and pushing the initial commit to the remote repository. The script prompts the user for a repository name and utilizes the GitHub API to create a new public repository.
 
 ## Prerequisites
