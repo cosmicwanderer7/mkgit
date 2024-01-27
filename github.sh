@@ -28,9 +28,11 @@ curl -u "$GITHUB_USERNAME:$GITHUB_TOKEN" -X POST https://api.github.com/user/rep
 git remote add origin "git@github.com:$GITHUB_USERNAME/$REPO_NAME.git"
 git push -u origin main
 
-# Open the repository in code editor (if available)
-if [[ $(command -v code) ]]; then
-code .
+# Open the repository in a code editor (if available)
+if command -v code &>/dev/null; then
+  code .
+elif command -v nvim &>/dev/null; then
+  nvim .
 else
-echo "The 'code' command is not available. Please open the repository manually."
-fi
+  echo "Neither 'vs code' nor 'nvim' is available. Please open the repository manually."
+fi 
