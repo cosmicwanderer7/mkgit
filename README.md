@@ -52,6 +52,6 @@ Before using this script, make sure you have the following:
 
 - `git push -u origin main`: Pushes the initial commit to the remote repository.
 
-- `code .`: Opens the repository in Visual Studio Code (you may need to have it installed).
+- `$editor .`: Opens the repository in Vs Code , Nvim or Sublime  (you may have to install one of them).
 
 Feel free to fork this repository, make any changes, and suggest improvements. Your contributions are welcome!
