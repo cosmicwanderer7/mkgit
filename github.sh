@@ -4,8 +4,10 @@
 set -euo pipefail
 
 # GitHub credentials (replace with your actual values)
-export GITHUB_USERNAME="cosmicwanderer7"
-export GITHUB_TOKEN="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"
+
+export GITHUB_USERNAME="your_github_username"
+export GITHUB_TOKEN="your_github_token"
+
 
 # Function to create initial commit
 create_initial_commit() {
