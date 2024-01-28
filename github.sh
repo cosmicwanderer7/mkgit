@@ -4,8 +4,8 @@
 set -euo pipefail
 
 # GitHub credentials (replace with your actual values)
-export GITHUB_USERNAME="your_username"
-export GITHUB_TOKEN="your_personal_access_token"
+export GITHUB_USERNAME="cosmicwanderer7"
+export GITHUB_TOKEN="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"
 
 # Function to create initial commit
 create_initial_commit() {
@@ -17,8 +17,7 @@ create_initial_commit() {
 create_remote_repo() {
   local repo_name="$1"
   local visibility="$2" # 'public' or 'private'
-  curl -u "$GITHUB_USERNAME:$GITHUB_TOKEN" -X POST https://api.github.com/user/repos \
-    -d "{\"name\":\"$repo_name\", \"private\": $visibility}"
+  curl -u "$GITHUB_USERNAME:$GITHUB_TOKEN" -X POST https://api.github.com/user/repos \ -d "{\"name\":\"$repo_name\", \"private\": $visibility}"
 }
 
 # Get repository name from user
