@@ -93,6 +93,10 @@ fi
 
 gh repo create "$repo_name" $create_opts -y
 
+# Create the repo Dir and jump into it.
+mkdir $repo_name
+cd $repo_name 
+
 # Create informative README template
 cat > README.md << EOF
 # $repo_name
