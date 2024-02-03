@@ -59,6 +59,9 @@ case "$visibility" in
   *) echo "Invalid choice. Defaulting to public repository."; visibility="false" ;;
 esac
 
+# Get repo name
+get_repo_name
+
 # Create and navigate to repository directory
 mkdir -p "$REPO_NAME" && cd "$REPO_NAME"
 
