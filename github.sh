@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 # Enable strict error handling
@@ -23,8 +24,8 @@ create_remote_repo() {
 # Function to prompt for GitHub credentials and save to config file
 prompt_github_credentials() {
   echo -e "\e[32mPlease enter your GitHub credentials to set up the script. Your credentials will be saved securely for later use.\e[0m"
-  read -ep "GitHub Username: " GITHUB_USERNAME
-  read -ep "GitHub Personal Access Token: " GITHUB_TOKEN
+  read -erp "GitHub Username: " GITHUB_USERNAME
+  read -erp "GitHub Personal Access Token: " GITHUB_TOKEN
   echo -e "\n" # Move to the next line after token input
 
   # Save credentials to the config file
@@ -58,7 +59,7 @@ load_github_credentials
 cd "$HOME/Documents/Projects" || { echo -e "\e[31mFailed to navigate to Documents/Projects directory. Exiting.\e[0m"; exit 1; }
 
 # Get repository name from user
-read -ep "Enter the desired repository name (min 3 characters, letters/numbers/-/_): " REPO_NAME
+read -erp "Enter the desired repository name (min 3 characters, letters/numbers/-/_): " REPO_NAME
 
 # Validate repository name
 if [[ ! "$REPO_NAME" =~ ^[a-zA-Z0-9_-]+$ || ${#REPO_NAME} -lt 3 ]]; then
@@ -67,7 +68,7 @@ if [[ ! "$REPO_NAME" =~ ^[a-zA-Z0-9_-]+$ || ${#REPO_NAME} -lt 3 ]]; then
 fi
 
 # Choose repository visibility (optional)
-read -ep "Create a public (1) or private (2) repository? [1]: " visibility
+read -erp "Create a public (1) or private (2) repository? [1]: " visibility
 if [[ -z "$visibility" ]]; then visibility=1; fi
 case "$visibility" in
   1) visibility="false" ;;
@@ -97,18 +98,24 @@ git push -u origin main
 # Set repo_path variable
 repo_path="$(pwd)"
 
-# Open the repository in a user-defined editor (if available)
-editor=""
-if command -v code &>/dev/null; then editor="code"
-elif command -v nvim &>/dev/null; then editor="nvim"
-elif command -v sublime &>/dev/null; then editor="sublime"
-fi
+echo -e "\e[32mSuccessfully created and initialized your Git repository: $REPO_NAME\e[0m"
+echo -e "\e[32mYour repository is located at: $repo_path\e[0m"
 
-if [[ -n "$editor" ]]; then
-  "$editor" .
+# Open the repository in a user-defined editor (if available)
+
+# Open the repository in the default code editor using xdg-open
+if command -v xdg-open &>/dev/null; then
+  xdg-open README.md &
+elif command -v code &>/dev/null; then
+  code .
+elif command -v nvim &>/dev/null; then
+  nvim .
+elif command -v sublime &>/dev/null; then
+  sublime .
 else
   echo -e "\e[31mNo preferred editor detected. Please open the repository manually.\e[0m"
 fi
 
-echo -e "\e[32mSuccessfully created and initialized your Git repository: $REPO_NAME\e[0m"
-echo -e "\e[32mYour repository is located at: $repo_path\e[0m"
+#open repo url in default browser 
+repo_url="https://github.com/$GITHUB_USERNAME/$REPO_NAME"
+xdg-open "$repo_url" || open "$repo_url" || start "$repo_url"
