@@ -56,10 +56,10 @@ Before using this script, make sure you have the following:
 
 ## Instructions (github-V2)
 
-1. Set Github Personal Access Token and the script will handle everything on its own.
+1. Set Github Personal Access Token when prompted and the script will handle everything on its own.
 
     ```
-    Replace your token at $token
+    Replace your token at $token only if not promted
     ```
 
 Feel free to fork this repository, make any changes, and suggest improvements. Your contributions are welcome!
