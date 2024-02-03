@@ -1,116 +1,80 @@
 #!/bin/bash
 
-# Check if GitHub CLI is installed
+# Set a more descriptive error message for missing GitHub CLI
 if ! command -v gh &> /dev/null; then
-    echo "GitHub CLI (gh) is not installed. Please install it first."
-    exit 1
+  echo "GitHub CLI (gh) is required for this script. Please install it from https://cli.github.com/."
+  exit 1
 fi
 
-# Enter Github Personal Access Token 
-read -p "Enter your personal access token :" token
-
-# Function to display a list of available licenses and prompt user to select one
-choose_protocol() {
-    echo "Select git protocol:"
-    select protocol in "https" "ssh"; do
-        case $protocol in
-            https|ssh)
-                echo "Selected Protocol: $protocol"
-                selected_protocol="$protocol"
-                break
-                ;;
-            *)
-                echo "Invalid selection. Please choose a valid protocol."
-                ;;
-        esac
-    done
-}
-
-
-
-# Check if GitHub CLI is already authenticated
+# Prompt for token only if not already authenticated
 if ! gh auth status &> /dev/null; then
-    echo "You are not authenticated. Please log in."
-    gh auth login --git-protocol $protocol --with-token $token
+  read -rsp "Enter your personal access token (will not be displayed): " token
+  gh auth login --with-token "$token"
 fi
 
-# Function to display a list of available licenses and prompt user to select one
-choose_license() {
-    echo "Select a license for the repository:"
-    select license in "MIT" "GNU GPLv3" "Apache License 2.0" "None"; do
-        case $license in
-            MIT|GNU\ GPLv3|Apache\ License\ 2.0|None)
-                echo "Selected license: $license"
-                selected_license="$license"
-                break
-                ;;
-            *)
-                echo "Invalid selection. Please choose a valid license."
-                ;;
-        esac
+# Use a single function for both protocol and license selection
+function choose_option() {
+  local options=("$@")
+  local prompt="$1"
+  shift
+  while true; do
+    select opt in "${options[@]}"; do
+      echo "Selected $opt"
+      return
     done
+    echo "Invalid selection. Please choose a valid option."
+  done
 }
 
-# Get repository name from user
+choose_protocol "Select git protocol:" "https" "ssh"
+selected_protocol=$REPLY
+
+# Ensure repository name is valid (alphabetic, numeric, hyphens, underscores)
 read -p "Enter the name of the repository: " repo_name
-
-# Check if the repository name is provided
-if [ -z "$repo_name" ]; then
-    echo "Repository name cannot be empty."
-    exit 1
+if [[ ! "$repo_name" =~ ^[a-zA-Z0-9-_]+$ ]]; then
+  echo "Invalid repository name. Please use only letters, numbers, hyphens, and underscores."
+  exit 1
 fi
 
-# Check if the repository name contains spaces
-if [[ "$repo_name" =~ [[:space:]] ]]; then
-    echo "Repository name cannot contain spaces."
-    exit 1
-fi
-
-# Check if the repository already exists on GitHub
-gh_repo_check=$(gh repo view "$repo_name" 2>&1)
-if [[ $gh_repo_check == *"Not Found"* ]]; then
-    echo "Repository does not exist on GitHub. Creating a new one..."
+# Check for existing repository directly using gh api
+if gh api repos/"$repo_name" 2>&1 | grep -q 'Not Found'; then
+  echo "Repository does not exist on GitHub. Creating a new one..."
 else
-    echo "Repository already exists on GitHub. Aborting."
-    exit 1
+  echo "Repository already exists on GitHub. Aborting."
+  exit 1
 fi
 
-# Get repository description from user
 read -p "Enter the description of the repository: " repo_description
+choose_license "Select a license for the repository:" "MIT" "GNU GPLv3" "Apache License 2.0" "None"
+selected_license=$REPLY
 
-# Choose a license
-choose_license
+gh repo create "$repo_name" --public -y --description="$repo_description" --license="$selected_license"
 
-# Create the repository with selected license if applicable
-if [ "$selected_license" != "None" ]; then
-    gh repo create $repo_name --public -y --description="$repo_description" --license="$selected_license"
-else
-    gh repo create $repo_name --public -y --description="$repo_description"
-fi
-
-# Check if the repository creation was successful
+# Check for successful repository creation before proceeding
 if [ $? -ne 0 ]; then
-    echo "Failed to create the repository."
-    exit 1
+  echo "Failed to create the repository."
+  exit 1
 fi
 
-# Initialize a git repository
+# Create a more informative README template
+cat > README.md << EOF
+# $repo_name
+
+**Description:**
+$repo_description
+
+**License:**
+$selected_license
+
+**Getting Started:**
+(Add instructions for using the repository here)
+EOF
+
+# Use 'main' as default branch for consistency
 git init
-
-# Create README.md file
-echo "# $repo_name" > README.md
-echo "This is the README file for the $repo_name repository." >> README.md
-
-# Add README.md file
 git add README.md
+git commit -m "Initial commit with README.md"
+git remote add origin "https://github.com/$USER/$repo_name.git"
+git push -u origin main
 
-# Commit changes
-git commit -m "Add README.md"
-
-# Set the remote origin
-git remote add origin "https://github.com/yourusername/$repo_name.git"
-
-# Push changes to the remote repository
-git push -u origin master
-
-echo "Repository successfully created with README.md and pushed to GitHub."
+echo "Repository successfully created with README.md and pushed to GitHub!"
