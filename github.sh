@@ -9,27 +9,46 @@ export GITHUB_USERNAME="your_github_username"
 export GITHUB_TOKEN="your_github_token"
 
 
-# Function to create initial commit
+###########################################################################
+## Function Name : create_initial_commit                                 ##
+## Description : Adds a README.md in the repository created and create   ##
+##               the initial commit in the repository                    ##
+###########################################################################
 create_initial_commit() {
   git add README.md
   git commit -m "Initial commit: $REPO_NAME"
 }
 
-# Function to create remote repository on GitHub
+###########################################################################
+## Function Name : create_remote_repo                                    ##
+## Description : Create a remote repository on Github using the Github   ##
+##               API with the provided repository name and visibility    ##
+## Arguments : $1 - Repository Name                                      ##
+##             $2 - Visiblity (public/private)                           ##
+###########################################################################
+
 create_remote_repo() {
   local repo_name="$1"
   local visibility="$2" # 'public' or 'private'
   curl -u "$GITHUB_USERNAME:$GITHUB_TOKEN" -X POST https://api.github.com/user/repos \ -d "{\"name\":\"$repo_name\", \"private\": $visibility}"
 }
 
-# Get repository name from user
-read -p "Enter the desired repository name (min 3 characters, letters/numbers/-/_): " REPO_NAME
+###########################################################################
+## Function Name : get_repo_name                                         ##
+## Description : Prompt the user to enter the desired repository name    ##
+##               with input validation.                                  ##
+###########################################################################
 
-# Validate repository name
-if [[ ! "$REPO_NAME" =~ ^[a-zA-Z0-9_-]+$ || ${#REPO_NAME} -lt 3 ]]; then
-  echo "Invalid repository name. Please use only letters, numbers, hyphens, and underscores (min 3 characters)."
-  exit 1
-fi
+get_repo_name() { 
+  read -p "Enter the desired repository name (min 3 characters, letters/numbers/-/_): " REPO_NAME
+
+  # Validate repository name
+  if [[ ! "$REPO_NAME" =~ ^[a-zA-Z0-9_-]+$ || ${#REPO_NAME} -lt 3 ]]; then
+    echo "Invalid repository name. Please use only letters, numbers, hyphens, and underscores (min 3 characters)."
+    exit 1
+  fi
+}
+
 
 # Choose repository visibility (optional)
 read -p "Create a public (1) or private (2) repository? [1]: " visibility
