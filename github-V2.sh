@@ -36,13 +36,6 @@ if [[ ! "$repo_name" =~ ^[a-zA-Z0-9-_]+$ ]]; then
   exit 1
 fi
 
-# Check for existing repository directly using gh api
-if gh api repos/"$repo_name" 2>&1 | grep -q 'Not Found'; then
-  echo "Repository does not exist on GitHub. Creating a new one..."
-else
-  echo "Repository already exists on GitHub. Aborting."
-  exit 1
-fi
 
 read -p "Enter the description of the repository: " repo_description
 choose_license "Select a license for the repository:" "MIT" "GNU GPLv3" "Apache License 2.0" "None"
