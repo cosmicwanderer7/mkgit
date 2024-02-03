@@ -6,10 +6,32 @@ if ! command -v gh &> /dev/null; then
     exit 1
 fi
 
+# Enter Github Personal Access Token 
+read -p "Enter your personal access token :" token
+
+# Function to display a list of available licenses and prompt user to select one
+choose_protocol() {
+    echo "Select git protocol:"
+    select protocol in "https" "ssh"; do
+        case $protocol in
+            https|ssh)
+                echo "Selected Protocol: $protocol"
+                selected_protocol="$protocol"
+                break
+                ;;
+            *)
+                echo "Invalid selection. Please choose a valid protocol."
+                ;;
+        esac
+    done
+}
+
+
+
 # Check if GitHub CLI is already authenticated
 if ! gh auth status &> /dev/null; then
     echo "You are not authenticated. Please log in."
-    gh auth login --with-token < your_personal_access_token
+    gh auth login --git-protocol $protocol --with-token $token
 fi
 
 # Function to display a list of available licenses and prompt user to select one
