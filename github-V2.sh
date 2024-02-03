@@ -3,40 +3,58 @@
 # Set script exit code to 0 initially
 set -e
 
+# Function to get a secure temporary token
+function get_temp_token() {
+  echo "Visit https://github.com/settings/tokens to create a personal access token with repo and gist:create permissions. Grant temporary access and copy the token here (will not be displayed):"
+  read -rsp "Temporary token: " token
+  # Use temporary token only for this script execution
+  gh auth login --with-token "$token"
+}
+
 # Check for GitHub CLI
 if ! command -v gh &> /dev/null; then
   echo "Error: GitHub CLI (gh) is required. Please install it from https://cli.github.com/."
   exit 1
 fi
 
-# Check authentication and get token if needed
-if ! gh auth status &> /dev/null; then
-  echo "Authentication required. Visit https://github.com/settings/tokens to create a personal access token with repo and gist: create permissions."
-  read -rsp "Enter your personal access token (will not be displayed): " token
-  gh auth login --with-token "$token"
+# Print usage instructions with -h or --help
+if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+  cat << EOF
+Usage: $0 [OPTIONS] <repository_name>
+
+Creates a new GitHub repository.
+
+Options:
+  -h, --help  Display this help message.
+  -p, --private  Create a private repository.
+  -l, --license <license>  Specify license (MIT, GNU GPLv3, Apache License 2.0, CC BY-SA 4.0, or None).
+  -d, --description <description>  Provide a description for the repository.
+
+Example:
+  $0 -p -l MIT my-project
+EOF
+  exit 0
 fi
 
-# Function for protocol and license selection
-function choose_option() {
-  local prompt="$1"
-  shift
-  while true; do
-    select opt in "$@"; do
-      echo "Selected: $opt"
-      return
-    done
-    echo "Invalid selection. Please choose a valid option."
-  done
-}
+# Parse options and arguments
+private=false
+license=""
+description=""
+while getopts ":hpl:d:" opt; do
+  case $opt in
+    h) ;;
+    p) private=true ;;
+    l) license="$OPTARG" ;;
+    d) description="$OPTARG" ;;
+    \?) echo "Invalid option: -$OPTARG" >&2; exit 1 ;;
+  esac
+done
+shift $((OPTIND - 1))
 
-# Choose protocol
-choose_protocol "Select git protocol:" "https" "ssh"
-selected_protocol=$REPLY
-
-# Check for valid repository name
-read -p "Enter the desired repository name (alphanumeric, hyphens, underscores): " repo_name
+# Validate repository name
+repo_name="$1"
 if [[ ! "$repo_name" =~ ^[a-zA-Z0-9-_]+$ ]]; then
-  echo "Invalid name. Use only letters, numbers, hyphens, and underscores."
+  echo "Invalid repository name. Use only letters, numbers, hyphens, and underscores."
   exit 1
 fi
 
@@ -48,23 +66,42 @@ else
   exit 1
 fi
 
-# Get description and license
-read -p "Enter a description for the repository: " repo_description
-choose_license "Select a license (or None):" "MIT" "GNU GPLv3" "Apache License 2.0" "None"
-selected_license=$REPLY
+# Get description if not provided with -d
+if [[ -z "$description" ]]; then
+  read -p "Enter a description for the repository: " description
+fi
 
-# Create repository with selected options
-gh repo create "$repo_name" --public -y --description="$repo_description" --license="$selected_license"
+# Choose license if not provided with -l
+if [[ -z "$license" ]]; then
+  choose_license "Select a license (or None):" "MIT" "GNU GPLv3" "Apache License 2.0" "CC BY-SA 4.0" "None"
+  license=$REPLY
+fi
+
+# Create repository with options
+create_opts=""
+if [[ $private ]]; then
+  create_opts="$create_opts --private"
+fi
+if [[ -n "$license" ]]; then
+  create_opts="$create_opts --license=$license"
+fi
+if [[ -n "$description" ]]; then
+  create_opts="$create_opts --description='$description'"
+fi
+
+get_temp_token # Use temporary token for repository creation
+
+gh repo create "$repo_name" $create_opts -y
 
 # Create informative README template
 cat > README.md << EOF
 # $repo_name
 
 **Description:**
-$repo_description
+$description
 
 **License:**
-$selected_license
+$license
 
 **Getting Started:**
 (Add instructions for using the repository here)
@@ -78,5 +115,8 @@ git commit -m "Initial commit with README.md"
 # Set remote origin and push to GitHub
 git remote add origin "https://github.com/$USER/$repo_name.git"
 git push -u origin main
+
+# Revoke temporary token and print success message
+gh auth logout
 
 echo "Successfully created '$repo_name' on GitHub with README.md!"
