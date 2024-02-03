@@ -3,14 +3,6 @@
 # Set script exit code to 0 initially
 set -e
 
-# Function to get a secure temporary token
-function get_temp_token() {
-  echo "Visit https://github.com/settings/tokens to create a personal access token with repo and gist:create permissions. Grant temporary access and copy the token here (will not be displayed):"
-  read -rsp "Temporary token: " token
-  # Use temporary token only for this script execution
-  gh auth login --with-token "$token"
-}
-
 # Check for GitHub CLI
 if ! command -v gh &> /dev/null; then
   echo "Error: GitHub CLI (gh) is required. Please install it from https://cli.github.com/."
@@ -30,7 +22,11 @@ Options:
   -l, --license <license>  Specify license (MIT, GNU GPLv3, Apache License 2.0, CC BY-SA 4.0, or None).
   -d, --description <description>  Provide a description for the repository.
 
+Environment Variables:
+  GITHUB_TOKEN  Set your personal access token with repo and gist:create permissions.
+
 Example:
+  export GITHUB_TOKEN=your_token
   $0 -p -l MIT my-project
 EOF
   exit 0
@@ -89,7 +85,11 @@ if [[ -n "$description" ]]; then
   create_opts="$create_opts --description='$description'"
 fi
 
-get_temp_token # Use temporary token for repository creation
+# Check for valid token in GITHUB_TOKEN environment variable
+if [[ -z "$GITHUB_TOKEN" ]]; then
+  echo "Error: GITHUB_TOKEN environment variable not set. Please set it with your personal access token (repo and gist:create permissions) before running the script."
+  exit 1
+fi
 
 gh repo create "$repo_name" $create_opts -y
 
@@ -115,8 +115,5 @@ git commit -m "Initial commit with README.md"
 # Set remote origin and push to GitHub
 git remote add origin "https://github.com/$USER/$repo_name.git"
 git push -u origin main
-
-# Revoke temporary token and print success message
-gh auth logout
 
 echo "Successfully created '$repo_name' on GitHub with README.md!"
