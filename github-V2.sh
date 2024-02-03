@@ -5,7 +5,7 @@ set -e
 
 # Check for GitHub CLI
 if ! command -v gh &> /dev/null; then
-  echo "Error: GitHub CLI (gh) is required. Please install it from https://cli.github.com/."
+  echo "Error: GitHub CLI (gh) is required. Please install it from you distro package manager or from  https://cli.github.com/."
   exit 1
 fi
 
