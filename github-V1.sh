@@ -82,14 +82,16 @@ git remote add origin "git@github.com:$GITHUB_USERNAME/$REPO_NAME.git"
 git push -u origin main
 
 # Open the repository in a user-defined editor (if available)
-editor=""
-if command -v code &>/dev/null; then editor="code"; fi
-elif command -v nvim &>/dev/null; then editor="nvim"; fi
-elif command -v sublime &>/dev/null; then editor="sublime"; fi
-if [[ -n "$editor" ]]; then
-  "$editor" .
+if command -v xdg-open &>/dev/null; then
+  xdg-open README.md &
+elif command -v code &>/dev/null; then #failsafe
+  code .
+elif command -v nvim &>/dev/null; then #failsafe
+  nvim .
+elif command -v sublime &>/dev/null; then #failsafe
+  sublime .
 else
-  echo "No preferred editor detected. Please open the repository manually."
+  echo -e "\e[31mNo preferred editor detected. Please open the repository manually.\e[0m"
 fi
 
 echo "Successfully created and initialized your Git repository: $REPO_NAME!"
