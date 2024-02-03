@@ -59,7 +59,7 @@ Before using this script, make sure you have the following:
 1. Set Github Personal Access Token when prompted and the script will handle everything on its own.
 
     ```
-    Replace your token at $token only if not promted
+    Replace your token at $token only if not prompted
     ```
 
 Feel free to fork this repository, make any changes, and suggest improvements. Your contributions are welcome!
