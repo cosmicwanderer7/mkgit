@@ -82,9 +82,7 @@ git remote add origin "git@github.com:$GITHUB_USERNAME/$REPO_NAME.git"
 git push -u origin main
 
 # Open the repository in a user-defined editor (if available)
-if command -v xdg-open &>/dev/null; then
-  xdg-open README.md &
-elif command -v code &>/dev/null; then #failsafe
+if command -v code &>/dev/null; then #failsafe
   code .
 elif command -v nvim &>/dev/null; then #failsafe
   nvim .
