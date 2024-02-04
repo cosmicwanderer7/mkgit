@@ -12,7 +12,7 @@ Before using this script, make sure you have the following:
 - GitHub username
 - GitHub personal access token with repo scope
 
-## Instructions
+## Instructions (github-V1)
 
 1. Set your GitHub username and personal access token:
 
@@ -54,4 +54,13 @@ Before using this script, make sure you have the following:
 
 - `$editor .`: Opens the repository in VS Code , Nvim or Sublime  (you may have to install one of them).
 
+## Instructions (github-V2)
+
+1. Set Github Personal Access Token when prompted and the script will handle everything on its own.
+
+    ```
+    Replace your token at $token only if not prompted
+    ```
+
 Feel free to fork this repository, make any changes, and suggest improvements. Your contributions are welcome!
+
