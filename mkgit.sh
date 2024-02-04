@@ -102,9 +102,8 @@ echo -e "\e[32mYour repository is located at: $repo_path\e[0m"
 
 # Open the repository in a user-defined editor (if available)
 
-if command -v xdg-open &>/dev/null; then
-  xdg-open README.md &
-elif command -v code &>/dev/null; then
+
+if command -v code &>/dev/null; then
   code .
 elif command -v nvim &>/dev/null; then
   nvim .
