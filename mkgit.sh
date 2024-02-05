@@ -7,24 +7,52 @@ set -euo pipefail
 CONFIG_FILE="$HOME/.github_config"
 
 DELETE_FLAG=false
-CREATE_IN_CURRENT_DIR=false
+INITIALIZE_REPO=false  # New flag to indicate whether to initialize a repo in the current directory
 
 # Function to delete the config file
 delete_config_file() {
   # Check if the file exists
   if [ -e "$CONFIG_FILE" ]; then
-      # Remove the file
-      rm "$CONFIG_FILE"
-      echo "The $CONFIG_FILE has been deleted."
+    # Remove the file
+    rm "$CONFIG_FILE"
+    echo "The $CONFIG_FILE has been deleted."
   else
-      echo "The file $CONFIG_FILE does not exist."
+    echo "The file $CONFIG_FILE does not exist."
   fi
 }
+
+# Parse command line options
+while getopts ":di" opt; do
+  case $opt in
+    d)
+      DELETE_FLAG=true
+      ;;
+    i)
+      INITIALIZE_REPO=true
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+  esac
+done
+
+# If -d flag is provided, delete the config file and exit
+if [ "$DELETE_FLAG" = true ]; then
+  delete_config_file
+  exit 0
+fi
+
+# If -i flag is provided, initialize Git repo in the current directory
+if [ "$INITIALIZE_REPO" = true ]; then
+  git init
+  REPO_NAME=$(basename $(pwd))  # Use the current directory name as the repository name
+fi
 
 # Function to create initial commit
 create_initial_commit() {
   git add README.md
-  git commit -m "Initial commit"
+  git commit -m "Initial commit: $REPO_NAME"
 }
 
 # Function to create remote repository on GitHub
@@ -62,35 +90,6 @@ create_projects_directory() {
   fi
 }
 
-# Function to create Git repository in the current directory
-create_git_repo_in_current_dir() {
-  git init -b main
-  echo "# $(basename "$(pwd)")" > README.md
-  create_initial_commit
-}
-
-# Parse command line options
-while getopts ":di" opt; do
-  case $opt in
-    d)
-      DELETE_FLAG=true
-      ;;
-    i)
-      CREATE_IN_CURRENT_DIR=true
-      ;;
-    \?)
-      echo "Invalid option: -$OPTARG" >&2
-      exit 1
-      ;;
-  esac
-done
-
-# If -d flag is provided, delete the config file and exit
-if [ "$DELETE_FLAG" = true ]; then
-  delete_config_file
-  exit 0
-fi
-
 # Check if config file exists, and if not, prompt for credentials
 if [ ! -f "$CONFIG_FILE" ]; then
   prompt_github_credentials
@@ -99,20 +98,46 @@ fi
 # Load GitHub credentials from the config file
 load_github_credentials
 
-# Set repository directory
-if [ "$CREATE_IN_CURRENT_DIR" = true ]; then
-  create_git_repo_in_current_dir
-else
-  create_projects_directory
-  cd "$HOME/Documents/Projects" || { echo -e "\e[31mFailed to navigate to Documents/Projects directory. Exiting.\e[0m"; exit 1; }
-fi
+# Navigate to Documents/Projects directory
+cd "$HOME/Documents/Projects" || { echo -e "\e[31mFailed to navigate to Documents/Projects directory. Exiting.\e[0m"; exit 1; }
 
 # Get repository name and description from user
-REPO_NAME=$(basename "$(pwd)")
+# Get repository name and description from user (skip if INITIALIZE_REPO=true)
+if [ "$INITIALIZE_REPO" != true ]; then
+  read -erp "Enter the desired repository name (min 3 characters, letters/numbers/-/_): " REPO_NAME
+fi
+
 read -erp "Enter a description for the repository: " REPO_DESCRIPTION
 
+# Validate repository name
+if [[ ! "$REPO_NAME" =~ ^[a-zA-Z0-9_-]+$ || ${#REPO_NAME} -lt 3 ]]; then
+  echo -e "\e[31mInvalid repository name. Please use only letters, numbers, hyphens, and underscores (min 3 characters).\e[0m"
+  exit 1
+fi
+
+# Choose repository visibility (optional)
+read -erp "Create a public (1) or private (2) repository? [1]: " visibility
+if [[ -z "$visibility" ]]; then visibility=1; fi
+case "$visibility" in
+  1) visibility="false" ;;
+  2) visibility="true" ;;
+  *) echo -e "\e[31mInvalid choice. Defaulting to public repository.\e[0m"; visibility="false" ;;
+esac
+
+# Create and navigate to repository directory
+mkdir -p "$REPO_NAME" && cd "$REPO_NAME"
+
+# Initialize Git repository with main branch
+git init -b main
+
+# Create README.md with repository name
+echo "# $REPO_NAME" > README.md
+
+# Add initial commit
+create_initial_commit
+
 # Create remote repository on GitHub
-create_remote_repo "$REPO_NAME" "false" "$REPO_DESCRIPTION"
+create_remote_repo "$REPO_NAME" "$visibility" "$REPO_DESCRIPTION"
 
 # Add remote and push initial commit
 git remote add origin "git@github.com:$GITHUB_USERNAME/$REPO_NAME.git"
