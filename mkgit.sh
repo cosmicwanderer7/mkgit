@@ -6,6 +6,39 @@ set -euo pipefail
 # Configuration file path
 CONFIG_FILE="$HOME/.github_config"
 
+DELETE_FLAG=false
+
+# Function to delete the config file
+delete_config_file() {
+  # Check if the file exists
+  if [ -e "$CONFIG_FILE" ]; then
+      # Remove the file
+      rm "$CONFIG_FILE"
+      echo "The $CONFIG_FILE has been deleted."
+  else
+      echo "The file $CONFIG_FILE does not exist."
+  fi
+}
+
+# Parse command line options
+while getopts ":d" opt; do
+  case $opt in
+    d)
+      DELETE_FLAG=true
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+  esac
+done
+
+# If -d flag is provided, delete the config file and exit
+if [ "$DELETE_FLAG" = true ]; then
+  delete_config_file
+  exit 0
+fi
+
 # Function to create initial commit
 create_initial_commit() {
   git add README.md
@@ -16,8 +49,9 @@ create_initial_commit() {
 create_remote_repo() {
   local repo_name="$1"
   local visibility="$2" # 'public' or 'private'
+  local description="$3"
   curl -u "$GITHUB_USERNAME:$GITHUB_TOKEN" -X POST https://api.github.com/user/repos \
-    -d "{\"name\":\"$repo_name\", \"private\": $visibility}" > /dev/null
+    -d "{\"name\":\"$repo_name\", \"private\": $visibility, \"description\": \"$description\"}" > /dev/null
 }
 
 # Function to prompt for GitHub credentials and save to config file
@@ -57,8 +91,9 @@ load_github_credentials
 # Navigate to Documents/Projects directory
 cd "$HOME/Documents/Projects" || { echo -e "\e[31mFailed to navigate to Documents/Projects directory. Exiting.\e[0m"; exit 1; }
 
-# Get repository name from user
+# Get repository name and description from user
 read -erp "Enter the desired repository name (min 3 characters, letters/numbers/-/_): " REPO_NAME
+read -erp "Enter a description for the repository: " REPO_DESCRIPTION
 
 # Validate repository name
 if [[ ! "$REPO_NAME" =~ ^[a-zA-Z0-9_-]+$ || ${#REPO_NAME} -lt 3 ]]; then
@@ -88,7 +123,7 @@ echo "# $REPO_NAME" > README.md
 create_initial_commit
 
 # Create remote repository on GitHub
-create_remote_repo "$REPO_NAME" "$visibility"
+create_remote_repo "$REPO_NAME" "$visibility" "$REPO_DESCRIPTION"
 
 # Add remote and push initial commit
 git remote add origin "git@github.com:$GITHUB_USERNAME/$REPO_NAME.git"
@@ -101,8 +136,6 @@ echo -e "\e[32mSuccessfully created and initialized your Git repository: $REPO_N
 echo -e "\e[32mYour repository is located at: $repo_path\e[0m"
 
 # Open the repository in a user-defined editor (if available)
-
-
 if command -v code &>/dev/null; then
   code .
 elif command -v nvim &>/dev/null; then
@@ -113,7 +146,6 @@ else
   echo -e "\e[31mNo preferred editor detected. Please open the repository manually.\e[0m"
 fi
 
-#open repo url in default browser using xdg-open 
-
+# Open repository URL in default browser using xdg-open
 repo_url="https://github.com/$GITHUB_USERNAME/$REPO_NAME"
 xdg-open "$repo_url" || open "$repo_url" || start "$repo_url"
