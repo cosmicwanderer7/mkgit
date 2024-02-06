@@ -152,7 +152,14 @@ main() {
   # Add remote and push initial commit
   git remote add origin "git@github.com:$GITHUB_USERNAME/$REPO_NAME.git"
 
+if [ "$LICENSE" = true ]; then
   git pull --rebase origin main && git push -u origin main
+elif git push -u origin main; then
+  echo "Git push successful"
+else
+  echo "Git push failed"
+fi
+
   # Set repo_path variable
   repo_path="$(pwd)"
 
@@ -163,7 +170,7 @@ main() {
 if command -v code &>/dev/null; then
     code . 
 elif command -v nvim &>/dev/null; then
-    nvim . 
+    nvim .
 elif command -v sublime &>/dev/null; then
     sublime . 
 else
