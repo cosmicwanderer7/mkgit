@@ -124,7 +124,6 @@ main() {
     esac
   fi
 
-  # ... (rest of the script)
   # Choose repository visibility (optional)
   read -erp "Create a public (1) or private (2) repository? [1]: " visibility
   if [[ -z "$visibility" ]]; then visibility=1; fi
