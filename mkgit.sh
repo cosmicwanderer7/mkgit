@@ -159,21 +159,18 @@ main() {
   echo -e "\e[32mSuccessfully created and initialized your Git repository: $REPO_NAME\e[0m"
   echo -e "\e[32mYour repository is located at: $repo_path\e[0m"
 
-  # Open the repository in a user-defined editor (if available)
-  if command -v code &>/dev/null; then
-    code .
-  elif command -v nvim &>/dev/null; then
-    nvim .
-  elif command -v sublime &>/dev/null; then
-    sublime .
-  else
+# Open the repository in a user-defined editor (if available)
+if command -v code &>/dev/null; then
+    code . 
+elif command -v nvim &>/dev/null; then
+    nvim . 
+elif command -v sublime &>/dev/null; then
+    sublime . 
+else
     echo -e "\e[31mNo preferred editor detected. Please open the repository manually.\e[0m"
     exit 1
-  fi
+fi
 
-  # Open repository URL in default browser using xdg-open
-  repo_url="https://github.com/$GITHUB_USERNAME/$REPO_NAME"
-  xdg-open "$repo_url" || open "$repo_url" || start "$repo_url"
 }
 
 # Parse command line options
