@@ -1,4 +1,4 @@
-#!/bin/bash
+ #!/bin/bash
 
 # Enable strict error handling
 set -euo pipefail
@@ -6,10 +6,13 @@ set -euo pipefail
 # Configuration file path
 CONFIG_FILE="$HOME/.github_config"
 
-DELETE_FLAG=false
-INITIALIZE_REPO=false
-LICENSE=""
-HELP_FLAG=false
+# Function to handle errors with specific error messages
+handle_error() {
+  local error_message="$1"
+  local exit_code="${2:-1}"  # Default exit code is 1 if not provided explicitly
+  echo -e "\e[31mError: $error_message\e[0m" >&2  # Print error message to stderr
+  exit "$exit_code"
+}
 
 # Function to display help message
 display_help() {
@@ -25,7 +28,7 @@ display_help() {
 # Function to delete the config file
 delete_config_file() {
   if [ -e "$CONFIG_FILE" ]; then
-    rm "$CONFIG_FILE"
+    rm "$CONFIG_FILE" || handle_error "Failed to delete the config file: $CONFIG_FILE."
     echo "The $CONFIG_FILE has been deleted."
   else
     echo "The file $CONFIG_FILE does not exist."
@@ -39,8 +42,15 @@ create_remote_repo() {
   local description="$3"
   local license="$4"
 
-  curl -u "$GITHUB_USERNAME:$GITHUB_TOKEN" -X POST https://api.github.com/user/repos \
-    -d "{\"name\":\"$repo_name\", \"private\": $visibility, \"description\": \"$description\", \"license_template\": \"$license\"}" > /dev/null
+  local response
+  response=$(curl -s -u "$GITHUB_USERNAME:$GITHUB_TOKEN" -X POST https://api.github.com/user/repos \
+    -d "{\"name\":\"$repo_name\", \"private\": $visibility, \"description\": \"$description\", \"license_template\": \"$license\"}")
+
+  if [[ $response == *"\"id\""* ]]; then
+    echo "Repository '$repo_name' created successfully on GitHub."
+  else
+    handle_error "Failed to create remote repository on GitHub. Response: $response"
+  fi
 }
 
 # Function to prompt for GitHub credentials and save to config file
@@ -51,21 +61,21 @@ prompt_github_credentials() {
   echo -e "\n" # Move to the next line after token input
 
   # Save credentials to the config file
-  echo "GITHUB_USERNAME=\"$GITHUB_USERNAME\"" > "$CONFIG_FILE"
-  echo "GITHUB_TOKEN=\"$GITHUB_TOKEN\"" >> "$CONFIG_FILE"
-  chmod 600 "$CONFIG_FILE" # Secure file permissions
+  echo "GITHUB_USERNAME=\"$GITHUB_USERNAME\"" > "$CONFIG_FILE" || handle_error "Failed to save GitHub username to config file."
+  echo "GITHUB_TOKEN=\"$GITHUB_TOKEN\"" >> "$CONFIG_FILE" || handle_error "Failed to save GitHub token to config file."
+  chmod 600 "$CONFIG_FILE" || handle_error "Failed to set permissions for the config file: $CONFIG_FILE."
 }
 
 # Function to load GitHub credentials from config file
 load_github_credentials() {
-  source "$CONFIG_FILE" 2>/dev/null || true
+  source "$CONFIG_FILE" 2>/dev/null || handle_error "Failed to load GitHub credentials from config file: $CONFIG_FILE."
 }
 
 # Function to create the Documents/Projects directory
 create_projects_directory() {
   local projects_dir="$HOME/Documents/Projects"
   if [ ! -d "$projects_dir" ]; then
-    mkdir -p "$projects_dir"
+    mkdir -p "$projects_dir" || handle_error "Failed to create Documents/Projects directory."
   fi
 }
 
@@ -73,10 +83,13 @@ create_projects_directory() {
 display_license_menu() {
   echo "Select a license:"
   echo "1. MIT"
-  echo "2. GNU GPLv3"
-  echo "3. Apache License 2.0"
-  echo "4. CC BY-SA 4.0"
-  echo "5. None"
+  echo "2. LGPL 3.0"
+  echo "3. Apache 2.0"
+  echo "4. MPL 2.0"
+  echo "5. AGPL 3.0"
+  echo "6. Unlicense"
+  echo "7. GPL-3.0"
+  echo "8. None" 
 }
 
 # Main functionality
@@ -90,20 +103,17 @@ main() {
   load_github_credentials
 
   # Navigate to Documents/Projects directory
-  cd "$HOME/Documents/Projects" || { echo -e "\e[31mFailed to navigate to Documents/Projects directory. Exiting.\e[0m"; exit 1; }
+  cd "$HOME/Documents/Projects" || handle_error "Failed to navigate to Documents/Projects directory."
 
-  # Get repository name and description from user
   # Get repository name and description from user (skip if INITIALIZE_REPO=true)
   if [ "$INITIALIZE_REPO" != true ]; then
     read -erp "Enter the desired repository name (min 3 characters, letters/numbers/-/_): " REPO_NAME
   fi
-
   read -erp "Enter a description for the repository: " REPO_DESCRIPTION
 
   # Validate repository name
   if [[ ! "$REPO_NAME" =~ ^[a-zA-Z0-9_-]+$ || ${#REPO_NAME} -lt 3 ]]; then
-    echo -e "\e[31mInvalid repository name. Please use only letters, numbers, hyphens, and underscores (min 3 characters).\e[0m"
-    exit 1
+    handle_error "Invalid repository name. Please use only letters, numbers, hyphens, and underscores (min 3 characters)."
   fi
 
   # If -l flag is provided, prompt for license selection
@@ -113,15 +123,20 @@ main() {
 
     case "$selected_license" in
       1) LICENSE="MIT" ;;
-      2) LICENSE="GNU GPLv3" ;;
-      3) LICENSE="Apache License 2.0" ;;
-      4) LICENSE="CC BY-SA 4.0" ;;
-      5) LICENSE="None" ;;
+      2) LICENSE="LGPL-3.0" ;;
+      3) LICENSE="Apache-2.0" ;;
+      4) LICENSE="MPL-2.0" ;;
+      5) LICENSE="AGPL-3.0" ;;
+      6) LICENSE="Unlicense" ;;
+      7) LICENSE="GPL-3.0";;
+      8) LICENSE="None";;
       *)
         echo -e "\e[31mInvalid license selection. Defaulting to None.\e[0m"
         LICENSE="None"
         ;;
     esac
+  else
+    LICENSE="None"  # Default to no license if -l flag is not provided
   fi
 
   # Choose repository visibility (optional)
@@ -130,54 +145,39 @@ main() {
   case "$visibility" in
     1) visibility="false" ;;
     2) visibility="true" ;;
-    *) echo -e "\e[31mInvalid choice. Defaulting to public repository.\e[0m"; visibility="false" ;;
+    *) handle_error "Invalid choice. Defaulting to public repository." ;;
   esac
 
   # Create and navigate to repository directory
-  mkdir -p "$REPO_NAME" && cd "$REPO_NAME"
+  mkdir -p "$REPO_NAME" && cd "$REPO_NAME" || handle_error "Failed to create repository directory."
 
   # Initialize Git repository with main branch
-  git init -b main
+  git init -b main || handle_error "Failed to initialize Git repository."
 
   # Create README.md with repository name
   echo "# $REPO_NAME" > README.md
 
   # Add initial commit
   git add README.md
-  git commit -m "Initial commit: $REPO_NAME"
+  git commit -m "Initial commit: $REPO_NAME" || handle_error "Failed to commit changes."
 
   # Create remote repository on GitHub
   create_remote_repo "$REPO_NAME" "$visibility" "$REPO_DESCRIPTION" "$LICENSE"
 
   # Add remote and push initial commit
-  git remote add origin "git@github.com:$GITHUB_USERNAME/$REPO_NAME.git"
+  git remote add origin "git@github.com:$GITHUB_USERNAME/$REPO_NAME.git" || handle_error "Failed to add remote repository."
 
-if [ "$LICENSE" = true ]; then
-  git pull --rebase origin main && git push -u origin main
-elif git push -u origin main; then
-  echo "Git push successful"
-else
-  echo "Git push failed"
-fi
+  if [ "$LICENSE" = true ]; then
+    git pull --rebase origin main && git push -u origin main || handle_error "Failed to push changes to remote repository."
+  else
+    git push -u origin main || handle_error "Failed to push changes to remote repository."
+  fi
 
   # Set repo_path variable
   repo_path="$(pwd)"
 
   echo -e "\e[32mSuccessfully created and initialized your Git repository: $REPO_NAME\e[0m"
   echo -e "\e[32mYour repository is located at: $repo_path\e[0m"
-
-# Open the repository in a user-defined editor (if available)
-if command -v code &>/dev/null; then
-    code . 
-elif command -v nvim &>/dev/null; then
-    nvim .
-elif command -v sublime &>/dev/null; then
-    sublime . 
-else
-    echo -e "\e[31mNo preferred editor detected. Please open the repository manually.\e[0m"
-    exit 1
-fi
-
 }
 
 # Parse command line options
@@ -196,8 +196,7 @@ while getopts ":dilh" opt; do
       HELP_FLAG=true
       ;;
     \?)
-      echo "Invalid option: -$OPTARG" >&2
-      exit 1
+      handle_error "Invalid option: -$OPTARG"  # Use handle_error function for unknown options
       ;;
   esac
 done
