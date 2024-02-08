@@ -17,7 +17,7 @@ display_license_menu() {
   echo "1. MIT"
   echo "2. LGPL 3.0"
   echo "3. Apache 2.0"
-  echo "4. MPL 2.0"
+  echo "4. MPL 2.0" 
   echo "5. AGPL 3.0"
   echo "6. Unlicense"
   echo "7. GPL-3.0"
