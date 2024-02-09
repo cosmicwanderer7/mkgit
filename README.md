@@ -1,4 +1,4 @@
-# GitHub Repository Initialization Script
+# Automate GitHub Repository Initialization with Bash
 
 https://github.com/cosmicwanderer7/github-script/assets/65147258/b2f25967-cf33-4d5a-ab1e-5a885a40004a
 
@@ -14,45 +14,46 @@ Before using this script, make sure you have the following:
 
 ## Instructions (mkgit.sh)
 
-1. Set your GitHub username and personal access token:
+1.  Clone the repository to your local machine:
+
+    ```bash
+    git clone https://github.com/your-username/bash-github-repo-creator.git
+    ```
+
+3. Navigate to the cloned directory:
+
+    ```bash
+    cd bash-github-repo-creator
+    ```
+
+4. Make the script executable:
+ 
+   ```bash
+   chmod +x mkgit.bash
+   ```
+   
+5. Execute the script
 
    ```bash
-   # GitHub username
-   GITHUB_USERNAME="YourGitHubUsername"
-
-   # GitHub personal access token
-   GITHUB_TOKEN="YourGitHubPersonalAccessToken"
+   ./github_repo_creator.sh [-d] [-i] [-l] [-h]
    ```
+   ###Flags
 
-2. Navigate to the desired directory where you want to create the new repository:
+   -d: Delete the configuration file and exit.
+   -i: Initialize a Git repository in the current directory.
+   -l: Prompt for license selection.
+   -h: Display the help message.
 
-   ```bash
-   cd /path/to/your/Documents
-   ```
+   Runing script without any flags makes new repo without licence at $HOME/Documents/Projects
 
-3. Run the script:
+7. The first time you use the script, it will prompt you to enter your GitHub credentials. These credentials will be saved in a configuration file for further use.
 
-   ```bash
-   ./script_name.sh
-   ```
+8. To run the script globally.
 
-4. Enter the desired repository name when prompted.
+   copy the script to ```/usr/local/bin```
 
-5. The script will create a new directory with the given repository name, initialize a Git repository, create an initial commit with a README file, and push it to the newly created GitHub repository.
+9. The script will create a new directory with the given repository name, initialize a Git repository, create an initial commit with a README file, and push it to the newly created GitHub repository.
 
-## Script Explanation
-
-- `git init -b main`: Initializes a new Git repository with the main branch.
-
-- `curl -u "$GITHUB_USERNAME:$GITHUB_TOKEN" https://api.github.com/user/repos -d '{"name":"'"$REPO_NAME"'", "private": false}'`: Uses the GitHub API to create a new public repository with the specified name.
-
-- `git remote add origin "git@github.com:$GITHUB_USERNAME/$REPO_NAME.git"`: Sets the remote repository URL.
-
-- `git branch -M main`: Renames the default branch to main.
-
-- `git push -u origin main`: Pushes the initial commit to the remote repository.
-
-- `$editor .`: Opens the repository in VS Code , Nvim or Sublime (you may have to install one of them).
 
 ## Instructions (mkgit-gh.sh)
 
