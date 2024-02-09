@@ -12,6 +12,17 @@ Before using this script, make sure you have the following:
 - GitHub username
 - [GitHub personal access token with repo scope](https://docs.github.com/en/enterprise-server@3.9/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
 
+## Contributing
+Contributions are welcome! If you find any issues or have suggestions for improvements, feel free to open an issue or submit a pull request. Make sure to follow the contribution guidelines.
+
+1. Fork the repository.
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`).
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4. Push to the branch (`git push origin feature/AmazingFeature`).
+5. Open a pull request.
+
+----------------------------------------------------------------------------------------
+
 ## Instructions (mkgit.sh)
 
 1.  Clone the repository to your local machine:
