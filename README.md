@@ -10,31 +10,31 @@ Before using this script, make sure you have the following:
 
 - GitHub account
 - GitHub username
-- GitHub personal access token with repo scope
+- [GitHub personal access token with repo scope](https://docs.github.com/en/enterprise-server@3.9/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
 
 ## Instructions (mkgit.sh)
 
 1. Set your GitHub username and personal access token:
 
-    ```bash
-    # GitHub username 
-    GITHUB_USERNAME="YourGitHubUsername"
+   ```bash
+   # GitHub username
+   GITHUB_USERNAME="YourGitHubUsername"
 
-    # GitHub personal access token
-    GITHUB_TOKEN="YourGitHubPersonalAccessToken"
-    ```
+   # GitHub personal access token
+   GITHUB_TOKEN="YourGitHubPersonalAccessToken"
+   ```
 
 2. Navigate to the desired directory where you want to create the new repository:
 
-    ```bash
-    cd /path/to/your/Documents
-    ```
+   ```bash
+   cd /path/to/your/Documents
+   ```
 
 3. Run the script:
 
-    ```bash
-    ./script_name.sh
-    ```
+   ```bash
+   ./script_name.sh
+   ```
 
 4. Enter the desired repository name when prompted.
 
@@ -52,14 +52,14 @@ Before using this script, make sure you have the following:
 
 - `git push -u origin main`: Pushes the initial commit to the remote repository.
 
-- `$editor .`: Opens the repository in VS Code , Nvim or Sublime  (you may have to install one of them).
+- `$editor .`: Opens the repository in VS Code , Nvim or Sublime (you may have to install one of them).
 
 ## Instructions (mkgit-gh.sh)
 
 1. Set Github Personal Access Token when prompted and the script will handle everything on its own.
 
-    ```
-    Replace your token at $token only if not prompted
-    ```
+   ```
+   Replace your token at $token only if not prompted
+   ```
 
 Feel free to fork this repository, make any changes, and suggest improvements. Your contributions are welcome!
