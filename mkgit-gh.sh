@@ -5,22 +5,22 @@ set -e
 
 # Check for GitHub CLI
 if ! command -v gh &> /dev/null; then
-  echo "Error: GitHub CLI (gh) is required. Please install it from you distro package manager or from  https://cli.github.com/."
+  echo "Error: GitHub CLI (gh) is required. Install it from your distro package manager or https://cli.github.com/"
   exit 1
 fi
 
-# Print usage instructions with -h or --help
+# Print usage with -h or --help
 if [[ "$1" == "-h" || "$1" == "--help" ]]; then
   cat << EOF
 Usage: $0 [OPTIONS] <repository_name>
 
-Creates a new GitHub repository.
+Creates a new GitHub repository with a README template.
 
 Options:
-  -h, --help  Display this help message.
-  -p, --private  Create a private repository.
-  -l, --license <license>  Specify license (MIT, GNU GPLv3, Apache License 2.0, CC BY-SA 4.0, or None).
-  -d, --description <description>  Provide a description for the repository.
+  -h, --help      Display this help message.
+  -p, --private   Create a private repository.
+  -l, --license   Specify license (MIT, GNU GPLv3, Apache 2.0, CC BY-SA 4.0, or None).
+  -d, --description Provide a description for the repository.
 
 Environment Variables:
   GITHUB_TOKEN  Set your personal access token with repo and gist:create permissions.
@@ -49,7 +49,7 @@ shift $((OPTIND - 1))
 
 # Validate repository name
 repo_name="$1"
-if [[ ! "$repo_name" =~ ^[a-zA-Z0-9-_]+$ ]]; then
+if [[ ! "<span class="math-inline">repo\_name" \=\~ ^\[a\-zA\-Z0\-9\-\_\]\+</span> ]]; then
   echo "Invalid repository name. Use only letters, numbers, hyphens, and underscores."
   exit 1
 fi
@@ -69,7 +69,12 @@ fi
 
 # Choose license if not provided with -l
 if [[ -z "$license" ]]; then
-  choose_license "Select a license (or None):" "MIT" "GNU GPLv3" "Apache License 2.0" "CC BY-SA 4.0" "None"
+  # Define license choices with descriptions for clarity
+  choices=("MIT (Open-source permissive license)" "GNU GPLv3 (Copyleft, strong copyleft)" "Apache License 2.0 (Permissive license)" "CC BY-SA 4.0 (Creative Commons, attribution & share-alike)" "None")
+  prompt="Select a license (or None):"
+  # Offer interactive or user-guided license selection (as applicable)
+  # ...
+
   license=$REPLY
 fi
 
@@ -85,39 +90,40 @@ if [[ -n "$description" ]]; then
   create_opts="$create_opts --description='$description'"
 fi
 
-# Check for valid token in GITHUB_TOKEN environment variable
+# Validate GITHUB_TOKEN
 if [[ -z "$GITHUB_TOKEN" ]]; then
-  echo "Error: GITHUB_TOKEN environment variable not set. Please set it with your personal access token (repo and gist:create permissions) before running the script."
+  echo "Error: GITHUB_TOKEN environment variable not set. Set it with your personal access token (repo and gist:create permissions) before running the script."
   exit 1
 fi
 
-gh repo create "$repo_name" "$create_opts" -y
+# Create repository on GitHub
+gh repo create "$repo_name" $create_opts -y
 
-# Create the repo Dir and jump into it.
-mkdir "$repo_name"
-cd "$repo_name" 
+echo "Successfully created '$repo_name' on GitHub!"
+
+# Create the repo directory locally (optional)
+# Uncomment and customize if desired
+# mkdir "$repo_name"
+# cd "$repo_name"
 
 # Create informative README template
 cat > README.md << EOF
 # $repo_name
 
 **Description:**
+
 $description
 
 **License:**
+
 $license
 
 **Getting Started:**
+
 (Add instructions for using the repository here)
-EOF
 
-# Initialize git, add and commit README
-git init
-git add README.md
-git commit -m "Initial commit with README.md"
+**Additional Notes:**
 
-# Set remote origin and push to GitHub
-git remote add origin "https://github.com/$USER/$repo_name.git"
-git push -u origin main
+* You can find more information about the project in the following files (if appropriate):
+    *
 
-echo "Successfully created '$repo_name' on GitHub with README.md!"
