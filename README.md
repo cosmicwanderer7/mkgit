@@ -52,7 +52,13 @@ Before using this script, make sure you have the following:
 
    copy the script to ```/usr/local/bin```
 
-9. The script will create a new directory with the given repository name, initialize a Git repository, create an initial commit with a README file, and push it to the newly created GitHub repository.
+   you can create a alias
+
+   ```
+   alias mkgit='mkgit.bash'
+   ```
+   
+10. The script will create a new directory with the given repository name, initialize a Git repository, create an initial commit with a README file, and push it to the newly created GitHub repository.
 
 ## Contributing
 Contributions are welcome! If you find any issues or have suggestions for improvements, feel free to open an issue or submit a pull request. Make sure to follow the contribution guidelines.
