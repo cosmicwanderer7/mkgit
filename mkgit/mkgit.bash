@@ -32,13 +32,15 @@ main() {
   # Load GitHub credentials from the config file
   source "$CONFIG_FILE" 2>/dev/null || true
 
-  # Navigate to Documents/Projects directory
-  cd "$HOME/Documents/Projects" || { echo -e "\e[31mFailed to navigate to Documents/Projects directory. Exiting.\e[0m"; exit 1; }
+ # Get repository name and description from user (skip if INITIALIZE_REPO=true)
+if [ "$INITIALIZE_REPO" = true ]; then
+  REPO_NAME=$(basename "$PWD")
+  REPO_PATH="$PWD" # Store the current directory path
 
-  # Get repository name and description from user
-  # Get repository name and description from user (skip if INITIALIZE_REPO=true)
- if [ "$INITIALIZE_REPO" != true ]; then
+elif [ "$INITIALIZE_REPO" != true ]; then
   while true; do
+  # Navigate to Documents/Projects directory
+cd "$HOME/Documents/Projects" || { echo -e "\e[31mFailed to navigate to Documents/Projects directory. Exiting.\e[0m"; exit 1; } 
     read -erp "Enter the desired repository name (min 3 characters, letters/numbers/-/_): " REPO_NAME
 
     if [[ ! "$REPO_NAME" =~ ^[a-zA-Z0-9_-]+$ || ${#REPO_NAME} -lt 3 ]]; then
@@ -49,6 +51,7 @@ main() {
   done
 fi
 
+# Get repository name and description from user
 read -erp "Enter a description for the repository: " REPO_DESCRIPTION
 
 # If -l flag is provided, prompt for license selection

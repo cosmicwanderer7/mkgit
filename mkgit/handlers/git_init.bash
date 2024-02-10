@@ -2,8 +2,10 @@
 
 git_init() {
   # Create and navigate to repository directory
-  mkdir -p "$REPO_NAME" && cd "$REPO_NAME"
 
+if [ "$INITIALIZE_REPO"  !=  "true" ]; then
+    mkdir -p "$REPO_NAME" && cd "$REPO_NAME"
+fi
   # Initialize Git repository with main branch
   git init -b main
 
