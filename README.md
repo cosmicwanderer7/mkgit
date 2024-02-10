@@ -35,7 +35,7 @@ Before using this script, make sure you have the following:
 5. Execute the script
 
    ```bash
-   ./github_repo_creator.sh [-d] [-i] [-l] [-h]
+   ./mkgit.bash [-d] [-i] [-l] [-h]
    ```
    ###Flags
 
