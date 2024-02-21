@@ -20,47 +20,49 @@ Before using this script, make sure you have the following:
     git clone https://github.com/your-username/bash-github-repo-creator.git
     ```
 
-3. Navigate to the cloned directory:
+2.  Navigate to the cloned directory:
 
     ```bash
     cd bash-github-repo-creator
     ```
 
-4. Make the script executable:
- 
-   ```bash
-   chmod +x mkgit.bash
-   ```
-   
-5. Execute the script
+3.  Make the script executable:
 
-   ```bash
-   ./mkgit.bash [-d] [-i] [-l] [-h]
-   ```
-   ###Flags
+    ```bash
+    chmod +x mkgit.bash
+    ```
 
-   -d: Delete the configuration file and exit.
-   -i: Initialize a Git repository in the current directory.
-   -l: Prompt for license selection.
-   -h: Display the help message.
+4.  Execute the script
 
-   Runing script without any flags makes new repo without licence at $HOME/Documents/Projects
+    ```bash
+    ./mkgit.bash [-d] [-i] [-l] [-h]
+    ```
 
-7. The first time you use the script, it will prompt you to enter your GitHub credentials. These credentials will be saved in a configuration file for further use.
+    ###Flags
 
-8. To run the script globally.
+    -d: Delete the configuration file and exit.
+    -i: Initialize a Git repository in the current directory.
+    -l: Prompt for license selection.
+    -h: Display the help message.
 
-   copy the script to ```/usr/local/bin```
+    Runing script without any flags makes new repo without licence at $HOME/Documents/Projects
 
-   you can create a alias
+5.  The first time you use the script, it will prompt you to enter your GitHub credentials. These credentials will be saved in a configuration file for further use.
 
-   ```
-   alias mkgit='mkgit.bash'
-   ```
-   
-10. The script will create a new directory with the given repository name, initialize a Git repository, create an initial commit with a README file, and push it to the newly created GitHub repository.
+6.  To run the script globally.
+
+    copy the script to `/usr/local/bin`
+
+    you can create a alias
+
+    ```
+    alias mkgit='mkgit.bash'
+    ```
+
+7.  The script will create a new directory with the given repository name, initialize a Git repository, create an initial commit with a README file, and push it to the newly created GitHub repository.
 
 ## Contributing
+
 Contributions are welcome! If you find any issues or have suggestions for improvements, feel free to open an issue or submit a pull request. Make sure to follow the contribution guidelines.
 
 1. Fork the repository.
@@ -69,16 +71,4 @@ Contributions are welcome! If you find any issues or have suggestions for improv
 4. Push to the branch (`git push origin feature/AmazingFeature`).
 5. Open a pull request.
 
-----------------------------------------------------------------------------------------
- 
-
-
-## Instructions (mkgit-gh.sh)
-
-1. Set Github Personal Access Token when prompted and the script will handle everything on its own.
-
-   ```
-   Replace your token at $token only if not prompted
-   ```
-
-Feel free to fork this repository, make any changes, and suggest improvements. Your contributions are welcome!
+---
