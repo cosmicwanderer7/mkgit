@@ -30,6 +30,6 @@ fi
     git push origin main
   else
     # Push local changes to remote
-    git push origin main
+  git push --set-upstream origin main
   fi
 }
