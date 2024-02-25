@@ -12,7 +12,11 @@ Before using this script, make sure you have the following:
 - GitHub username
 - [GitHub personal access token with repo scope](https://docs.github.com/en/enterprise-server@3.9/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
 
-## Instructions (mkgit.bash)
+## Installation Instructions (mkgit.bash)
+
+### Archlinux/Manjaro
+
+   ```yay -S mkgit```
 
 1.  Clone the repository to your local machine:
 
